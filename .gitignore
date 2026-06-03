@@ -1,0 +1,11 @@
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.db
+store_intelligence.db
+.pytest_cache/
+yolov8n.pt
+.DS_Store
+Store 1/
+Store 2/

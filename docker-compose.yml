@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./app:/app/app
+      - ./pos_transactions.csv:/app/pos_transactions.csv
+    environment:
+      - POS_FILE_PATH=/app/pos_transactions.csv
