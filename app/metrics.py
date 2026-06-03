@@ -36,7 +36,7 @@ async def get_store_metrics(store_id: str, db: Session = Depends(get_db)):
     base_query = db.query(EventRecord).filter(EventRecord.store_id == store_id, EventRecord.is_staff == False)
     
     # 1. Unique visitors
-    unique_visitors = base_query.filter(EventRecord.event_type == 'ENTRY').count()
+    unique_visitors = base_query.filter(EventRecord.event_type == 'ENTRY').with_entities(func.count(func.distinct(EventRecord.visitor_id))).scalar() or 0
     
     # 2. Avg dwell per zone
     zone_dwells = base_query.filter(EventRecord.event_type == 'ZONE_DWELL').with_entities(
