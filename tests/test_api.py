@@ -81,3 +81,37 @@ def test_staff_exclusion():
     response = client.get("/stores/STORE_STAFF/metrics")
     assert response.status_code == 200
     assert response.json()["unique_visitors"] == 0
+
+def test_happy_path_journey():
+    store_id = "STORE_HAPPY"
+    visitor_id = "VIS_HAPPY"
+    timestamp_base = datetime.now(timezone.utc)
+    
+    # Send sequence of events
+    events = [
+        {"event_id": str(uuid.uuid4()), "store_id": store_id, "camera_id": "CAM1", "visitor_id": visitor_id, "event_type": "ENTRY", "timestamp": timestamp_base.isoformat().replace('+00:00', 'Z'), "confidence": 0.99},
+        {"event_id": str(uuid.uuid4()), "store_id": store_id, "camera_id": "CAM2", "visitor_id": visitor_id, "event_type": "ZONE_ENTER", "zone_id": "AISLE_1", "timestamp": timestamp_base.isoformat().replace('+00:00', 'Z'), "confidence": 0.99},
+        {"event_id": str(uuid.uuid4()), "store_id": store_id, "camera_id": "CAM3", "visitor_id": visitor_id, "event_type": "BILLING_QUEUE_JOIN", "zone_id": "BILLING", "metadata": {"queue_depth": 8}, "timestamp": timestamp_base.isoformat().replace('+00:00', 'Z'), "confidence": 0.99}
+    ]
+    client.post("/events/ingest", json=events)
+    
+    # Check metrics
+    m_resp = client.get(f"/stores/{store_id}/metrics")
+    assert m_resp.status_code == 200
+    assert m_resp.json()["unique_visitors"] == 1
+    assert m_resp.json()["current_queue_depth"] == 8
+    
+    # Check funnel
+    f_resp = client.get(f"/stores/{store_id}/funnel")
+    assert f_resp.status_code == 200
+    funnel = f_resp.json()["funnel"]
+    assert len(funnel) == 4
+    assert funnel[0]["count"] == 1  # Entry
+    assert funnel[1]["count"] == 1  # Zone
+    assert funnel[2]["count"] == 1  # Billing Queue
+    
+    # Check anomalies
+    a_resp = client.get(f"/stores/{store_id}/anomalies")
+    assert a_resp.status_code == 200
+    anomalies = a_resp.json()["anomalies"]
+    assert any(a["type"] == "BILLING_QUEUE_SPIKE" for a in anomalies)
