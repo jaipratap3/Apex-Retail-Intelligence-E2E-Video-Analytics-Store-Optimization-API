@@ -43,7 +43,17 @@ The system actively maps POS transactions (`pos_transactions.csv`) against the r
 
 ---
 
+# **Innovative AI Features Built-In**
+
+We went beyond basic tracking to build a **Predictive Operations Engine**:
+
+- **Predictive Queue Velocity AI**: Mathematically detects rapid queue influx (+2 people in < 120s) and triggers preemptive register alerts *before* capacity is breached.
+- **Dynamic Staff-to-Customer Ratios**: Autonomously dispatches employees if a zone exceeds 3 customers with 0 staff present.
+- **Idempotent Funnel Deduplication**: Safely mitigates YOLO tracking glitches using robust SQL mathematical bounds.
+
+---
+
 # **Deployment & Scalability**
 - **100% Dockerized:** Instantly runs on any system using `docker-compose up`.
+- **Live Visual Dashboard:** A real-time Streamlit UI (`dashboard/app.py`) natively polls the API to render dynamic charts.
 - **Stateless Intelligence:** The FastAPI server maintains zero state, meaning it can be load-balanced horizontally across multiple store locations.
-- **Extensible:** The API exposes clean JSON endpoints for custom dashboards and alerts.
