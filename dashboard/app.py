@@ -2,8 +2,9 @@ import streamlit as st
 import requests
 import time
 import pandas as pd
+import os
 
-API_URL = "http://localhost:8000"
+API_URL = os.environ.get("API_URL", "http://localhost:8000")
 STORE_ID = "STORE_BLR_002"
 
 st.set_page_config(page_title="Apex Retail Dashboard", layout="wide")

@@ -10,3 +10,12 @@ services:
       - ./pos_transactions.csv:/app/pos_transactions.csv
     environment:
       - POS_FILE_PATH=/app/pos_transactions.csv
+
+  dashboard:
+    build: ./dashboard
+    ports:
+      - "8501:8501"
+    environment:
+      - API_URL=http://api:8000
+    depends_on:
+      - api
