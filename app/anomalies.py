@@ -52,14 +52,40 @@ async def get_store_anomalies(store_id: str, db: Session = Depends(get_db)):
                 "suggested_action": "Check camera feed or store layout for blockages."
             })
             
-    # 3. Conversion Drop vs 7-day avg
-    # For challenge simulation, we'll just mock this as we might not have 7 days of data
-    # We can calculate conversion rate for today and if it's below a hardcoded threshold (e.g. 5%), flag it.
-    anomalies.append({
-        "type": "CONVERSION_DROP",
-        "severity": "CRITICAL",
-        "message": "Conversion rate is significantly lower than 7-day average.",
-        "suggested_action": "Investigate POS system status and staff availability."
-    }) # Mocked for demonstration
+    # 3. Predictive Queue Velocity (Innovation)
+    # Check if queue depth is rapidly increasing
+    recent_queues = db.query(EventRecord).filter(
+        EventRecord.store_id == store_id,
+        EventRecord.event_type == 'BILLING_QUEUE_JOIN'
+    ).order_by(EventRecord.timestamp.desc()).limit(2).all()
+    
+    if len(recent_queues) == 2:
+        q_now = recent_queues[0]
+        q_prev = recent_queues[1]
+        depth_diff = q_now.metadata_json.get('queue_depth', 0) - q_prev.metadata_json.get('queue_depth', 0)
+        time_diff = (q_now.timestamp - q_prev.timestamp).total_seconds()
+        
+        if depth_diff >= 2 and time_diff < 120:  # Queue grew by 2+ people in under 2 minutes
+            anomalies.append({
+                "type": "PREDICTIVE_QUEUE_SPIKE",
+                "severity": "CRITICAL",
+                "message": f"Queue velocity is dangerously high (+{depth_diff} people in {int(time_diff)}s).",
+                "suggested_action": "Preemptively open a new billing counter before capacity is breached."
+            })
+
+    # 4. Dynamic Conversion Drop
+    from sqlalchemy import func
+    unique_visitors = db.query(EventRecord).filter(EventRecord.store_id == store_id, EventRecord.event_type == 'ENTRY').with_entities(func.count(func.distinct(EventRecord.visitor_id))).scalar() or 0
+    
+    if unique_visitors > 5:
+        # If we have lots of visitors but the queue is empty, conversion is tanking
+        queue_joins = db.query(EventRecord).filter(EventRecord.store_id == store_id, EventRecord.event_type == 'BILLING_QUEUE_JOIN').count()
+        if queue_joins == 0:
+            anomalies.append({
+                "type": "CONVERSION_DROP",
+                "severity": "CRITICAL",
+                "message": f"Critical funnel dropoff: {unique_visitors} unique visitors but 0 entered the billing queue.",
+                "suggested_action": "Investigate store layout or POS system status immediately."
+            })
     
     return {"anomalies": anomalies}
