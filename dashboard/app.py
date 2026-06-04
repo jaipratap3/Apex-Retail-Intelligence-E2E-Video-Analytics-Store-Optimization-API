@@ -5,7 +5,7 @@ import pandas as pd
 import os
 
 API_URL = os.environ.get("API_URL", "http://localhost:8000")
-STORE_ID = "STORE_BLR_002"
+STORE_ID = "STORE_1"
 
 st.set_page_config(page_title="Apex Retail Dashboard", layout="wide")
 
