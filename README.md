@@ -39,3 +39,11 @@ The API exposes the following endpoints (available after `docker-compose up`):
 * `GET /stores/{id}/funnel`: Conversion funnel.
 * `GET /stores/{id}/anomalies`: Anomaly detection.
 * `GET /health`: System health.
+
+## Live Dashboard
+To view the beautiful, real-time analytics dashboard UI:
+1. Open a new terminal window.
+2. Navigate to the dashboard directory: `cd dashboard`
+3. Install the UI dependencies: `pip install -r requirements.txt`
+4. Run the Streamlit app: `streamlit run app.py`
+5. The Live Dashboard will automatically open in your browser at `http://localhost:8501`, rendering live metrics, funnel charts, and anomaly alerts dynamically as the AI pipeline runs.
