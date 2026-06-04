@@ -9,7 +9,7 @@ STORE_ID = "STORE_1"
 
 st.set_page_config(page_title="Apex Retail Dashboard", layout="wide")
 
-st.title(f"Apex Retail Live Dashboard - {STORE_ID}")
+st.title(f"Apex Retail Live Dashboard - STORE_BLR_002")
 
 # Layout
 col1, col2, col3 = st.columns(3)
@@ -38,16 +38,18 @@ while True:
             c2.metric("Conversion Rate", f"{metrics.get('conversion_rate_percent', 0)}%")
             c3.metric("Queue Depth", metrics.get("current_queue_depth", 0))
             
-    if funnel and "funnel" in funnel:
-        with funnel_placeholder.container():
-            st.subheader("Conversion Funnel")
+    with funnel_placeholder.container():
+        st.subheader("Conversion Funnel")
+        if funnel and "funnel" in funnel and funnel["funnel"]:
             df = pd.DataFrame(funnel["funnel"])
             if not df.empty:
                 st.bar_chart(df.set_index("stage")["count"])
+        else:
+            st.info("Waiting for tracking data to generate funnel...")
                 
-    if anomalies and "anomalies" in anomalies and anomalies["anomalies"]:
-        with anomalies_placeholder.container():
-            st.subheader("Active Anomalies")
+    with anomalies_placeholder.container():
+        st.subheader("Active Anomalies")
+        if anomalies and "anomalies" in anomalies and anomalies["anomalies"]:
             for anom in anomalies["anomalies"]:
                 if anom["severity"] == "CRITICAL":
                     st.error(f"{anom['type']}: {anom['message']}")
@@ -55,5 +57,7 @@ while True:
                     st.warning(f"{anom['type']}: {anom['message']}")
                 else:
                     st.info(f"{anom['type']}: {anom['message']}")
+        else:
+            st.success("✅ No anomalies detected. Store operating optimally.")
     
     time.sleep(2)
