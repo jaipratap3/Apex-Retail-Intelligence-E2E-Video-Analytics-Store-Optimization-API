@@ -2,6 +2,9 @@
 
 export API_URL="http://127.0.0.1:8000"
 
+# Clear previous event logs
+rm -f ../events.jsonl
+
 # Process Store 1 clips
 export STORE_ID="STORE_1"
 

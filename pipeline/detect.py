@@ -49,6 +49,13 @@ def emit_event(event_type, visitor_id, zone_id=None, dwell_ms=0, confidence=0.9,
         "metadata": metadata
     }
     
+    # Write to local JSONL for submission requirement
+    try:
+        with open("../events.jsonl", "a") as f:
+            f.write(json.dumps(event) + "\n")
+    except Exception as e:
+        print(f"Error writing to events.jsonl: {e}")
+
     try:
         response = requests.post(f"{API_URL}/events/ingest", json=[event])
         if response.status_code != 207:
