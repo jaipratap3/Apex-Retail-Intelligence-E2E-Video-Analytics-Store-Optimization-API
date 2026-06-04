@@ -5,11 +5,13 @@ import pandas as pd
 import os
 
 API_URL = os.environ.get("API_URL", "http://localhost:8000")
-STORE_ID = "STORE_1"
 
 st.set_page_config(page_title="Apex Retail Dashboard", layout="wide")
 
-st.title(f"Apex Retail Live Dashboard - STORE_BLR_002")
+st.sidebar.title("Store Selection")
+STORE_ID = st.sidebar.selectbox("Live View", ["STORE_1", "STORE_2"])
+
+st.title(f"Apex Retail Live Dashboard - {STORE_ID}")
 
 # Layout
 col1, col2, col3 = st.columns(3)

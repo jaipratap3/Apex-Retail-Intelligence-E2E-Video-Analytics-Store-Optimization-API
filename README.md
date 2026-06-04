@@ -2,7 +2,7 @@
 
 ## Prerequisites
 - Docker & Docker Compose installed on your system.
-- Ensure the `Store 1` folder containing the `.mp4` video clips is placed directly in the repository root folder before running.
+- Ensure the `Store 1` and `Store 2` folders containing the `.mp4` video clips are placed directly in the repository root folder before running.
 
 ## Setup Instructions
 1. Clone the repository and navigate into the root directory:
