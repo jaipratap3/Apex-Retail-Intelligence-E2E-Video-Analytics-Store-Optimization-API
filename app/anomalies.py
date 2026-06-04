@@ -87,5 +87,31 @@ async def get_store_anomalies(store_id: str, db: Session = Depends(get_db)):
                 "message": f"Critical funnel dropoff: {unique_visitors} unique visitors but 0 entered the billing queue.",
                 "suggested_action": "Investigate store layout or POS system status immediately."
             })
+    # 5. Staff-to-Customer Ratio Alert (Innovation)
+    # Check if there are many customers in a zone but no staff recently
+    recent_zone_events = db.query(EventRecord).filter(
+        EventRecord.store_id == store_id,
+        EventRecord.timestamp >= now - timedelta(minutes=15),
+        EventRecord.event_type.in_(['ZONE_ENTER', 'ZONE_DWELL'])
+    ).all()
     
+    zone_occupancy = {}
+    for event in recent_zone_events:
+        if event.zone_id not in zone_occupancy:
+            zone_occupancy[event.zone_id] = {'customers': set(), 'staff': set()}
+        
+        if event.is_staff:
+            zone_occupancy[event.zone_id]['staff'].add(event.visitor_id)
+        else:
+            zone_occupancy[event.zone_id]['customers'].add(event.visitor_id)
+            
+    for zone, counts in zone_occupancy.items():
+        if len(counts['customers']) > 3 and len(counts['staff']) == 0:
+            anomalies.append({
+                "type": "UNDERSTAFFED_ZONE",
+                "severity": "WARN",
+                "message": f"Zone '{zone}' has {len(counts['customers'])} active customers but 0 staff members.",
+                "suggested_action": f"Dispatch an associate to {zone} to assist customers and prevent abandonment."
+            })
+            
     return {"anomalies": anomalies}
